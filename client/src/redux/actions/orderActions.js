@@ -107,6 +107,37 @@ export const payOrder = (orderId, paymentResult) => async (
   }
 };
 
+export const deliverOrder = (id) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: actionTypes.ORDER_DELIVER_REQUEST,
+    });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const { data } = await orderApi.deliverOrder(id, userInfo.token);
+
+    dispatch({
+      type: actionTypes.ORDER_DELIVER_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === 'Not authorized, token failed') {
+      dispatch(logout());
+    }
+    dispatch({
+      type: actionTypes.ORDER_DELIVER_FAIL,
+      payload: message,
+    });
+  }
+};
+
 export const listMyOrders = () => async (dispatch, getState) => {
   try {
     dispatch({
@@ -133,6 +164,37 @@ export const listMyOrders = () => async (dispatch, getState) => {
     }
     dispatch({
       type: actionTypes.ORDER_LIST_MY_FAIL,
+      payload: message,
+    });
+  }
+};
+
+export const listOrders = () => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: actionTypes.ORDER_LIST_REQUEST,
+    });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const { data } = await orderApi.getOrders(userInfo.token);
+
+    dispatch({
+      type: actionTypes.ORDER_LIST_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === 'Not authorized, token failed') {
+      dispatch(logout());
+    }
+    dispatch({
+      type: actionTypes.ORDER_LIST_FAIL,
       payload: message,
     });
   }

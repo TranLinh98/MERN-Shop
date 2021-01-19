@@ -3,16 +3,18 @@ import { PayPalButton } from 'react-paypal-button-v2';
 import { Link } from 'react-router-dom';
 import { Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { getOrderDetails, payOrder } from '../redux/actions/orderActions';
+import {
+  deliverOrder,
+  getOrderDetails,
+  payOrder,
+} from '../redux/actions/orderActions';
 import Loading from '../components/Ui/Loading/Loading';
 import Message from '../components/Ui/Message/Message';
 import orderApi from '../api/orderApi';
-import * as actionTypes from '../constants/orderConstants';
-
-// import {
-//   ORDER_PAY_RESET,
-//   ORDER_DELIVER_RESET,
-// } from '../constants/orderConstants';
+import {
+  ORDER_PAY_RESET,
+  ORDER_DELIVER_RESET,
+} from '../constants/orderConstants';
 
 const OrderScreen = ({ match, history }) => {
   const orderId = match.params.id;
@@ -27,8 +29,8 @@ const OrderScreen = ({ match, history }) => {
   const orderPay = useSelector((state) => state.orderPay);
   const { loading: loadingPay, success: successPay } = orderPay;
 
-  //   const orderDeliver = useSelector((state) => state.orderDeliver);
-  //   const { loading: loadingDeliver, success: successDeliver } = orderDeliver;
+  const orderDeliver = useSelector((state) => state.orderDeliver);
+  const { loading: loadingDeliver, success: successDeliver } = orderDeliver;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -61,10 +63,9 @@ const OrderScreen = ({ match, history }) => {
       document.body.appendChild(script);
     };
 
-    // || successDeliver || order._id !== orderId
-    if (!order || successPay) {
-      dispatch({ type: actionTypes.ORDER_PAY_RESET });
-      // dispatch({ type: ORDER_DELIVER_RESET });
+    if (!order || successPay || successDeliver || order._id !== orderId) {
+      dispatch({ type: ORDER_PAY_RESET });
+      dispatch({ type: ORDER_DELIVER_RESET });
       dispatch(getOrderDetails(orderId));
     } else if (!order.isPaid) {
       if (!window.paypal) {
@@ -73,8 +74,7 @@ const OrderScreen = ({ match, history }) => {
         setSdkReady(true);
       }
     }
-    //}, [dispatch, orderId, , successDeliver, order]);
-  }, [dispatch, orderId, successPay, order]);
+  }, [dispatch, orderId, successPay, order, successDeliver]);
 
   const successPaymentHandler = (paymentResult) => {
     console.log(paymentResult);
@@ -82,7 +82,7 @@ const OrderScreen = ({ match, history }) => {
   };
 
   const deliverHandler = () => {
-    //dispatch(deliverOrder(order));
+    dispatch(deliverOrder(order._id));
   };
 
   return loading ? (
@@ -203,7 +203,7 @@ const OrderScreen = ({ match, history }) => {
                   )}
                 </ListGroup.Item>
               )}
-              {/* {loadingDeliver && <Loading />} */}
+              {loadingDeliver && <Loading />}
               {userInfo &&
                 userInfo.isAdmin &&
                 order.isPaid &&

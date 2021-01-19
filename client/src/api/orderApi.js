@@ -12,6 +12,16 @@ class OrderApi {
     return axios.post(ulr, order, config);
   };
 
+  getOrders = (token) => {
+    const config = {
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    };
+    const ulr = '/api/orders/';
+    return axios.get(ulr, config);
+  };
+
   getOrderDetails = (id, token) => {
     const config = {
       headers: {
@@ -31,6 +41,16 @@ class OrderApi {
     };
     const ulr = `/api/orders/${orderId}/pay`;
     return axios.put(ulr, paymentResult, config);
+  };
+
+  deliverOrder = (orderId, token) => {
+    const config = {
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    };
+    const ulr = `/api/orders/${orderId}/deliver`;
+    return axios.put(ulr, {}, config);
   };
 
   addPayPalScript = () => {
